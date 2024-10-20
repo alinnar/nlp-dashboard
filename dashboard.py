@@ -44,25 +44,25 @@ def show_wordcloud_page(data):
     st.title("☁️ Wordcloud")
     st.write("Visualisasi Wordcloud dari hasil crawling:")
     
-    if 'stemming' in data.columns:
-        data_text = ' '.join(data['stemming'].astype(str).tolist())
+    if 'cleaning' in data.columns:
+        data_text = ' '.join(data['cleaning'].astype(str).tolist())
 
-        wc = WordCloud(background_color='white', max_words=150, width=1000, height=300).generate(data_text)
+        wc = WordCloud(background_color='white', max_words=150, width=650, height=300).generate(data_text)
 
-        plt.figure(figsize=(30, 5))
+        plt.figure(figsize=(50, 50))
         plt.imshow(wc, interpolation='bilinear')
         plt.axis('off')
         st.pyplot(plt)
     else:
-        st.warning("Kolom 'stemming' tidak ditemukan dalam data.")
+        st.warning("Kolom 'cleaning' tidak ditemukan dalam data.")
 
 # Fungsi untuk menampilkan Top Words
 def show_top_words_page(data):
     st.title("📈 Top Words")
     st.write("Berikut adalah 12 kata yang paling sering muncul:")
     
-    if 'stemming' in data.columns:
-        text = ' '.join(data['stemming'].astype(str))
+    if 'cleaning' in data.columns:
+        text = ' '.join(data['cleaning'].astype(str))
         words = text.split()
 
         word_counts = Counter(words)
@@ -84,10 +84,10 @@ def show_top_words_page(data):
 
         st.pyplot(plt)
     else:
-        st.warning("Kolom 'stemming' tidak ditemukan dalam data.")
+        st.warning("Kolom 'cleaning' tidak ditemukan dalam data.")
 
 # Baca file CSV (sesuaikan dengan path file CSV Anda)
-file_path = "NLP_dashboard/hasil_processing.csv"  # Ganti dengan lokasi file CSV Anda
+file_path = "./dataset/hasil_processing.csv"  # Ganti dengan lokasi file CSV Anda
 data = pd.read_csv(file_path)
 
 # Sidebar untuk navigasi halaman
