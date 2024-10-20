@@ -3,12 +3,17 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
 from collections import Counter
+import re
 import numpy as np
+import pickle
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.metrics import accuracy_score, classification_report
+from nltk.stem import PorterStemmer
 
 # Bagian untuk mempercantik layout
 st.set_page_config(page_title="Dashboard Analisis Teks", layout="wide", page_icon="📊")
 
-# Fungsi untuk menambahkan custom CSS
 # Fungsi untuk menambahkan custom CSS
 def set_custom_style():
     st.markdown(
@@ -43,11 +48,11 @@ def show_data_page(data):
 def show_wordcloud_page(data):
     st.title("☁️ Wordcloud")
     st.write("Visualisasi Wordcloud dari hasil crawling:")
-    
+
     if 'cleaning' in data.columns:
         data_text = ' '.join(data['cleaning'].astype(str).tolist())
 
-        wc = WordCloud(background_color='white', max_words=150, width=650, height=300).generate(data_text)
+        wc = WordCloud(background_color='white', max_words=150, width=700, height=280).generate(data_text)
 
         plt.figure(figsize=(50, 50))
         plt.imshow(wc, interpolation='bilinear')
@@ -60,7 +65,7 @@ def show_wordcloud_page(data):
 def show_top_words_page(data):
     st.title("📈 Top Words")
     st.write("Berikut adalah 12 kata yang paling sering muncul:")
-    
+
     if 'cleaning' in data.columns:
         text = ' '.join(data['cleaning'].astype(str))
         words = text.split()
@@ -86,12 +91,61 @@ def show_top_words_page(data):
     else:
         st.warning("Kolom 'cleaning' tidak ditemukan dalam data.")
 
+# Fungsi untuk prediksi sentimen
+def predict_sentiment(text, model, vectorizer):
+    text_vectorized = vectorizer.transform([text])
+    prediction = model.predict(text_vectorized)
+    return prediction
+
+# Fungsi untuk memuat halaman Sentiment Analysis
+def show_sentiment_analysis_page():
+    st.title("Sentiment Analysis NLP App")
+
+    with st.form("nlpForm"):
+        raw_text = st.text_area("Enter Text Here")
+        submit_buttton = st.form_submit_button(label='Analyze')
+
+    # Layout kolom
+    col1, col2 = st.columns(2)
+    if submit_buttton:
+        # Baca data yang diunggah
+        data = pd.read_csv('./dataset/predicted_sentiment_balanced.csv')  # Sesuaikan path file dengan file yang diunggah
+        data['cleaned_tweet'] = data['cleaned_x']
+        x = data['cleaned_tweet']
+        y = data['predicted_sentiment']
+
+        # Vectorizer dan model Naive Bayes
+        vec = CountVectorizer()
+        train = vec.fit_transform(x)
+
+        model = MultinomialNB()
+        model.fit(train, y)
+
+        # Prediksi sentimen dari input pengguna
+        y_pred = predict_sentiment(raw_text, model, vec)
+
+        with col1:
+            st.info("Results")
+            st.write(y_pred)
+
+            # Emoji hasil sentimen
+            if y_pred == 'positive':
+                st.markdown("Kata atau kalimat tersebut menunjukan Sentiment : Positive : 😍 ")
+            elif y_pred == 'neutral':
+                st.markdown("Kata atau kalimat tersebut menunjukan Sentiment : Netral : 🙂")
+            else:
+                st.markdown("Kata atau kalimat tersebut menunjukan Sentiment : Negative : 😡 ")
+
+# Fungsi untuk menampilkan halaman lainnya
+def show_data_page(data):
+    st.write(data)
+
 # Baca file CSV (sesuaikan dengan path file CSV Anda)
-file_path = "./dataset/hasil_processing.csv"  # Ganti dengan lokasi file CSV Anda
+file_path = './dataset/hasil_processing.csv'
 data = pd.read_csv(file_path)
 
 # Sidebar untuk navigasi halaman
-page = st.sidebar.selectbox("Pilih Halaman", ["Data Hasil Crawling", "Wordcloud", "Top Words"])
+page = st.sidebar.selectbox("Pilih Halaman", ["Data Hasil Crawling", "Wordcloud", "Top Words", "Sentiment Analysis"])
 
 # Tampilkan halaman sesuai pilihan
 if page == "Data Hasil Crawling":
@@ -100,3 +154,5 @@ elif page == "Wordcloud":
     show_wordcloud_page(data)
 elif page == "Top Words":
     show_top_words_page(data)
+elif page == "Sentiment Analysis":
+    show_sentiment_analysis_page()
