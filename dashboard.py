@@ -38,11 +38,11 @@ def set_custom_style():
         unsafe_allow_html=True
     )
 
-# Fungsi untuk menampilkan data crawling
+# Fungsi untuk menampilkan halaman lainnya
 def show_data_page(data):
-    st.title("Data Hasil Crawling")
-    st.write("Berikut adalah data yang diperoleh dari hasil crawling:")
-    st.dataframe(data)
+    st.title("💬 Data Hasil Crawling")
+    st.markdown("Berikut adalah data yang diperoleh dari hasil crawling:")
+    st.write(data)
 
 # Fungsi untuk menampilkan Wordcloud
 def show_wordcloud_page(data):
@@ -136,9 +136,7 @@ def show_sentiment_analysis_page():
             else:
                 st.markdown("Kata atau kalimat tersebut menunjukan Sentiment : Negative : 😡 ")
 
-# Fungsi untuk menampilkan halaman lainnya
-def show_data_page(data):
-    st.write(data)
+
 
 # Baca file CSV (sesuaikan dengan path file CSV Anda)
 file_path = './dataset/hasil_processing.csv'
